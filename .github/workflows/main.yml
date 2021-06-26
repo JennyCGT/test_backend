@@ -37,16 +37,27 @@ jobs:
           # passphrase: ${{ secrets.PASSPHRASE }} 
           # envs: RDS_LOGIN_DB,RDS_HOST,RDS_USER, RDS_PASSWORD,RDS_DATABASE,RDS_PORT,PGADMIN_DEFAULT_EMAIL,PGADMIN_DEFAULT_PASSWORD
           # script: cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build
-          commands: |     
-              export RDS_LOGIN_DB=${{ secrets.RDS_LOGIN_DB }}
-              export RDS_HOST=${{ secrets.RDS_HOST }}
-              export RDS_PASSWORD=${{ secrets.RDS_PASSWORD}}
-              export RDS_USER=${{ secrets.RDS_USER }}
-              export RDS_DATABASE=${{ secrets.RDS_DATABASE }}
-              export RDS_PORT=${{ secrets.RDS_PORT }}
-              export PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}
-              export PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
-              cd ${{ secrets.PROJECT_PATH }} && add_environmeent.sh
+          script: cd ${{ secrets.PROJECT_PATH }} && git pull
+      - name: Start containers
+        run: docker-compose -f "docker-compose.yml" up -d --build
+        env:  
+          RDS_LOGIN_DB: "postgres"
+          RDS_HOST: "db"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin"
+          RDS_DATABASE: "chatBackend"
+          RDS_PORT:  "5432"
+          PGADMIN_DEFAULT_EMAIL: "user@domain.com"
+          PGADMIN_DEFAULT_PASSWORD: "SuperSecret"
+              # export RDS_LOGIN_DB=${{ secrets.RDS_LOGIN_DB }}
+              # export RDS_HOST=${{ secrets.RDS_HOST }}
+              # export RDS_PASSWORD=${{ secrets.RDS_PASSWORD}}
+              # export RDS_USER=${{ secrets.RDS_USER }}
+              # export RDS_DATABASE=${{ secrets.RDS_DATABASE }}
+              # export RDS_PORT=${{ secrets.RDS_PORT }}
+              # export PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}
+              # export PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
+              # cd ${{ secrets.PROJECT_PATH }} && add_environmeent.sh
               
       # cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build      
       # - name: Stop containers
