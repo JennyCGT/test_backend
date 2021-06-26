@@ -31,13 +31,13 @@ jobs:
         #   PGADMIN_DEFAULT_EMAIL: "user@domain.com"
         #   PGADMIN_DEFAULT_PASSWORD: "SuperSecret"
         with: 
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.KEY }}
+          hosts: ${{ secrets.SERVER_IP }}
+          user: ${{ secrets.SERVER_USERNAME }}
+          private_key: ${{ secrets.KEY }}
           # passphrase: ${{ secrets.PASSPHRASE }} 
           # envs: RDS_LOGIN_DB,RDS_HOST,RDS_USER, RDS_PASSWORD,RDS_DATABASE,RDS_PORT,PGADMIN_DEFAULT_EMAIL,PGADMIN_DEFAULT_PASSWORD
           # script: cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build
-          script: |     
+          commands: |     
               export RDS_LOGIN_DB=${{ secrets.RDS_LOGIN_DB }}
               export RDS_HOST=${{ secrets.RDS_HOST }}
               export RDS_PASSWORD=${{ secrets.RDS_PASSWORD}}
