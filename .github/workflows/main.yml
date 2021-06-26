@@ -46,7 +46,9 @@ jobs:
               export RDS_PORT=${{ secrets.RDS_PORT }}
               export PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}
               export PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
-              cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build      
+              add_environmeent.sh
+              
+      # cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build      
       # - name: Stop containers
       #   if: always()
       #   run: cd ${{ secrets.PROJECT_PATH }} && docker-compose -f "docker-compose.yml" down
