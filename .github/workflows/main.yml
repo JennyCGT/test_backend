@@ -22,20 +22,22 @@ jobs:
       - name: Push to server
         uses: appleboy/ssh-action@master
         env:
-          RDS_LOGIN_DB: postgres
-          RDS_HOST: db
-          RDS_USER: admin
-          RDS_PASSWORD: admin
-          RDS_DATABASE: chatBackend
-          RDS_PORT:  5432
-          PGADMIN_DEFAULT_EMAIL: user@domain.com
-          PGADMIN_DEFAULT_PASSWORD: SuperSecret
+          RDS_LOGIN_DB: "postgres"
+          RDS_HOST: "db"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin"
+          RDS_DATABASE: "chatBackend"
+          RDS_PORT:  "5432"
+          PGADMIN_DEFAULT_EMAIL: "user@domain.com"
+          PGADMIN_DEFAULT_PASSWORD: "SuperSecret"
         with: 
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.KEY }}
           # passphrase: ${{ secrets.PASSPHRASE }} 
           envs: RDS_LOGIN_DB,RDS_HOST,RDS_USER, RDS_PASSWORD,RDS_DATABASE,RDS_PORT,PGADMIN_DEFAULT_EMAIL,PGADMIN_DEFAULT_PASSWORD
+          script: |
+            echo "I am $RDS_LOGIN_DB"
           # script: cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build
 
       # - name: Stop containers
