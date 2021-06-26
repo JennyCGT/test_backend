@@ -20,7 +20,7 @@ jobs:
         id: clone-repository
         uses: actions/checkout@main
       - name: Push to server
-        uses: appleboy/ssh-action@master
+        uses: docker://evaneos/ssh-action:0.1.0
         # env:
         #   RDS_LOGIN_DB: "postgres"
         #   RDS_HOST: "db"
