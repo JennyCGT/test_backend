@@ -21,11 +21,25 @@ jobs:
         uses: actions/checkout@main
       - name: Push to server
         uses: appleboy/ssh-action@master
-        with:
+        env:
+          POSTGRESQL_VERSION: 13.3.0
+          RDS_LOGIN_DB: postgres
+          RDS_HOST: db
+          RDS_USER: admin
+          RDS_PASSWORD: admin
+          RDS_DATABASE: chatBackend
+          RDS_PORT:  5432
+          PGADMIN_DEFAULT_EMAIL: user@domain.com
+          PGADMIN_DEFAULT_PASSWORD: SuperSecret
+        with: 
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.KEY }}
           # passphrase: ${{ secrets.PASSPHRASE }} 
           script: cd ${{ secrets.PROJECT_PATH }} && git pull
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yml" down
       - name: Start containers
         run: docker-compose -f "docker-compose.yml" up -d --build
