@@ -1,0 +1,31 @@
+# Read more about setting it up
+# https://medium.com/@ljmocic/deploying-react-application-to-aws-s3-using-github-actions-85addacaeace
+
+name: Deploy Django app
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+
+  push:
+    branches: [ main ]
+  #pull_request:
+  #  branches: [ main ]
+
+jobs:
+  deploy:
+    name: Build phase
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        id: clone-repository
+        uses: actions/checkout@main
+      - name: Push to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.KEY }}
+          # passphrase: ${{ secrets.PASSPHRASE }} 
+          script: cd ${{ secrets.PROJECT_PATH }} && git pull
+      - name: Start containers
+        run: docker-compose -f "docker-compose.yml" up -d --build

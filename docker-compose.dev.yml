@@ -1,0 +1,46 @@
+version: "3.9"
+
+
+services:
+    db:
+        #container_name: db
+        restart: always
+        image: "bitnami/postgresql:${POSTGRESQL_VERSION}"    
+        expose:
+          - "5432"    
+        environment:
+          POSTGRES_HOST_AUTH_METHOD: "trust"
+          POSTGRESQL_USERNAME: "${RDS_USER}"
+          POSTGRESQL_PASSWORD: "${RDS_PASSWORD}"
+          POSTGRESQL_DATABASE: "${RDS_DATABASE}"
+        volumes:
+          - ./db:/bitnami/postgresql
+    
+    
+    pgadmin4:
+        #container_name: pgadmin4
+        restart: always
+        image: "dpage/pgadmin4:5.3"    
+        ports:
+          - "5051:80"  
+        depends_on:
+          - db
+        environment:
+          PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+          PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+    
+    django:
+        container_name: "django"
+        build: .
+        command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+        # gunicorn chat_backend.wsgi:application --bind 0.0.0.0:8000" # Django commands to run app using gunicorn
+        # command: gunicorn chat_backend.wsgi:application --bind 0.0.0.0:8000
+        volumes:
+        - .:/code
+        # - ./static:/code/static
+        ports:
+        - "8000:8000"
+        depends_on:
+        - db
+        expose: 
+        - "8000"

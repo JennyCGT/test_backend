@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: db
+    restart: always
+    image: "bitnami/postgresql:13.3.0"
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRESQL_USERNAME: "${RDS_USER}"
+      POSTGRESQL_PASSWORD: "${RDS_PASSWORD}"
+      POSTGRESQL_DATABASE: "${RDS_DATABASE}"
+    volumes:
+      - ./db:/bitnami/postgresql
+
+  pgadmin4:
+    container_name: pgadmin4
+    restart: always 
+    image: "dpage/pgadmin4:5.3"
+    expose: 
+      - "80"
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
+
+  fastapi:
+    container_name: "fastapi"    
+    # ockerfile: Dockerfile
+    # image: "jrtec/django-video-inspections"
+    build: ./backend
+    # command: "uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
+    command: "sh -c ' alembic upgrade head && uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000'"
+    # command: "sh -c ' alembic revision --autogenerate &&  alembic upgrade head && uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000'"
+    #    command: "sh -c 'python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000'"
+    volumes:
+      - ./backend:/code
+    ports:
+      - "8000:8000"
+    env_file: .env
+    # expose:
+    #   - "8000"
+    depends_on: 
+      - db
+    ports:
+      - 8000:8000
+  
+
+  nginx:
+    container_name: "nginx"
+    restart: always
+    image: "nginx:1.19.10" # location of the dockerfile that defines the nginx image. The dockerfile will be used to spin up an image during the build stage
+    ports:
+      - "80:8080"
+    volumes: # static storages provisioned since django does not handle static files in production
+      - ./chat_backend/static:/code/static
+      - ./nginx-config-files/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx-config-files/app.nginx.template:/etc/nginx/templates/app.nginx.template
+    env_file: .env
+    depends_on: 
+      - fastapi
