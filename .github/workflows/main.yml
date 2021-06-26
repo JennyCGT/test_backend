@@ -22,7 +22,6 @@ jobs:
       - name: Push to server
         uses: appleboy/ssh-action@master
         env:
-          POSTGRESQL_VERSION: 13.3.0
           RDS_LOGIN_DB: postgres
           RDS_HOST: db
           RDS_USER: admin
