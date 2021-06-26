@@ -19,23 +19,33 @@ jobs:
       - name: Clone repository
         id: clone-repository
         uses: actions/checkout@main
-      - name: Push to server
-        uses: appleboy/ssh-action@master
-        env:
-          RDS_LOGIN_DB: postgres
-          RDS_HOST: db
-          RDS_USER: admin
-          RDS_PASSWORD: admin
-          RDS_DATABASE: chatBackend
-          RDS_PORT:  5432
-          PGADMIN_DEFAULT_EMAIL: user@domain.com
-          PGADMIN_DEFAULT_PASSWORD: SuperSecret
-        with: 
+      - name: running docker info
+        uses: ironhalik/docker-over-ssh-action@v1
+        with:
+          user: ${{ secrets.SERVER_USERNAME }}
           host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.KEY }}
-          # passphrase: ${{ secrets.PASSPHRASE }} 
-          script: cd ${{ secrets.PROJECT_PATH }} && git pull
+          # port: 1022 # Defaults to 22
+          script: |
+            docker info
+            docker stack deploy --compose-file=docker-compose.yml stack
+        # - name: Push to server
+        # uses: appleboy/ssh-action@master
+        # env:
+        #   RDS_LOGIN_DB: postgres
+        #   RDS_HOST: db
+        #   RDS_USER: admin
+        #   RDS_PASSWORD: admin
+        #   RDS_DATABASE: chatBackend
+        #   RDS_PORT:  5432
+        #   PGADMIN_DEFAULT_EMAIL: user@domain.com
+        #   PGADMIN_DEFAULT_PASSWORD: SuperSecret
+        # with: 
+        #   host: ${{ secrets.SERVER_IP }}
+        #   username: ${{ secrets.SERVER_USERNAME }}
+        #   key: ${{ secrets.KEY }}
+        #   # passphrase: ${{ secrets.PASSPHRASE }} 
+        #   script: cd ${{ secrets.PROJECT_PATH }} && git pull
 
       # - name: Stop containers
       #   if: always()
