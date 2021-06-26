@@ -39,6 +39,6 @@ jobs:
 
       - name: Stop containers
         if: always()
-        run: docker-compose -f "docker-compose.yml" down
+        run: cd ${{ secrets.PROJECT_PATH }} && docker-compose -f "docker-compose.yml" down
       - name: Start containers
-        run: docker-compose -f "docker-compose.yml" up -d --build
+        run: cd ${{ secrets.PROJECT_PATH }} && docker-compose -f "docker-compose.yml" up -d --build
