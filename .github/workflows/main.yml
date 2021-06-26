@@ -35,8 +35,8 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.KEY }}
           # passphrase: ${{ secrets.PASSPHRASE }} 
-          envs: RDS_LOGIN_DB, RDS_HOST, RDS_USER, RDS_PASSWORD, RDS_DATABASE, RDS_PORT, PGADMIN_DEFAULT_EMAIL, PGADMIN_DEFAULT_PASSWORD
-          script: cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build
+          envs: RDS_LOGIN_DB,RDS_HOST,RDS_USER, RDS_PASSWORD,RDS_DATABASE,RDS_PORT,PGADMIN_DEFAULT_EMAIL,PGADMIN_DEFAULT_PASSWORD
+          # script: cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build
 
       # - name: Stop containers
       #   if: always()
