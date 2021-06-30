@@ -9,59 +9,37 @@ on:
   push:
     branches: [ main ]
   #pull_request:
-  #  branches: [ main ]
-
+  #  branches: [ main 
 jobs:
-  deploy:
-    name: Build phase
+  build:
+    name: Build, test and publish app Docker images
     runs-on: ubuntu-latest
     steps:
-      - name: Clone repository
-        id: clone-repository
-        uses: actions/checkout@main
-      - name: Push to server
-        uses: docker://evaneos/ssh-action:0.1.0
-        # env:
-        #   RDS_LOGIN_DB: "postgres"
-        #   RDS_HOST: "db"
-        #   RDS_USER: "admin"
-        #   RDS_PASSWORD: "admin"
-        #   RDS_DATABASE: "chatBackend"
-        #   RDS_PORT:  "5432"
-        #   PGADMIN_DEFAULT_EMAIL: "user@domain.com"
-        #   PGADMIN_DEFAULT_PASSWORD: "SuperSecret"
-        with: 
-          hosts: ${{ secrets.SERVER_IP }}
-          user: ${{ secrets.SERVER_USERNAME }}
-          private_key: ${{ secrets.KEY }}
-          # passphrase: ${{ secrets.PASSPHRASE }} 
-          # envs: RDS_LOGIN_DB,RDS_HOST,RDS_USER, RDS_PASSWORD,RDS_DATABASE,RDS_PORT,PGADMIN_DEFAULT_EMAIL,PGADMIN_DEFAULT_PASSWORD
-          # script: cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build
-          commands: cd ${{ secrets.PROJECT_PATH }} && git pull
-      - name: Start containers
-        run: docker-compose -f "docker-compose.yml" up -d --build
-        env:  
-          RDS_LOGIN_DB: "postgres"
-          RDS_HOST: "db"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin"
-          RDS_DATABASE: "chatBackend"
-          RDS_PORT:  "5432"
-          PGADMIN_DEFAULT_EMAIL: "user@domain.com"
-          PGADMIN_DEFAULT_PASSWORD: "SuperSecret"
-              # export RDS_LOGIN_DB=${{ secrets.RDS_LOGIN_DB }}
-              # export RDS_HOST=${{ secrets.RDS_HOST }}
-              # export RDS_PASSWORD=${{ secrets.RDS_PASSWORD}}
-              # export RDS_USER=${{ secrets.RDS_USER }}
-              # export RDS_DATABASE=${{ secrets.RDS_DATABASE }}
-              # export RDS_PORT=${{ secrets.RDS_PORT }}
-              # export PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_DEFAULT_EMAIL }}
-              # export PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
-              # cd ${{ secrets.PROJECT_PATH }} && add_environmeent.sh
-              
-      # cd ${{ secrets.PROJECT_PATH }} && git pull && docker-compose -f "docker-compose.yml" up -d --build      
-      # - name: Stop containers
-      #   if: always()
-      #   run: cd ${{ secrets.PROJECT_PATH }} && docker-compose -f "docker-compose.yml" down
-      # - name: Start containers
-      #   run: cd ${{ secrets.PROJECT_PATH }} && docker-compose -f "docker-compose.yml" up -d --build
+      - uses: actions/checkout@main
+
+      - name: Build the docker-compose stack
+        run: docker network create my_services && docker-compose up --build -d
+
+      - name: Get init logs
+        run: docker-compose logs
+
+      - name: Run test suite
+        run: docker-compose exec -T web pytest
+
+      - name: Publish image(s)
+        run: |
+          docker tag test_backend ${{ secrets.DOCKER_USERNAME}}/test_backend:${{ github.sha }} && \
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p "${{ secrets.DOCKER_PASSWORD }}"
+          docker push ${{ secrets.DOCKER_USERNAME}}/test_backend:${{ github.sha }}
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    name: Run remote deploy script
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: appleboy/ssh-action@v0.0.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{secrets.SERVER_USERNAME}}
+          key: ${{ secrets.SSH_KEY }}
+          script: ./deploy-test_backend.sh
